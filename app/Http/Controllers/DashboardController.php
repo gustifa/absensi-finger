@@ -92,10 +92,6 @@ class DashboardController extends Controller
             if ($zk->connect()) {
                 // Menarik semua data user dari memori mesin
                 $users = $zk->getUser();
-
-                // TAMBAHKAN BARIS INI UNTUK MENGINTIP DATA MENTAH
-                //dd($users);
-                
                 $jumlahBaru = 0;
 
                 foreach ($users as $u) {

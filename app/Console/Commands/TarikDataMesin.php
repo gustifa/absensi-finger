@@ -11,12 +11,20 @@ use App\Models\Member;
 use Carbon\Carbon;
 class TarikDataMesin extends Command
 {
+<<<<<<< HEAD
    // Nama perintah yang dipanggil oleh tombol atau terminal
     protected $signature = 'absen:tarik {ip=192.168.1.10}';
 
     // Deskripsi perintah
     protected $description = 'Menarik log absensi dari mesin fingerprint X100-C';
 
+=======
+    /**
+     * Execute the console command.
+     */
+    protected $signature = 'absen:tarik {ip=192.168.1.10}';
+    protected $description = 'Tarik data masuk & pulang dari mesin fingerprint';
+>>>>>>> 3e77bc9c080b9e85a980f588c885a7a11c516be5
     public function handle()
     {
         $ip = $this->argument('ip');
