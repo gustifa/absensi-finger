@@ -19,6 +19,10 @@
                     <x-nav-link :href="route('kehadiran.manual')" :active="request()->routeIs('kehadiran.manual')">
                         {{ __('Input Manual') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('user.create')" :active="request()->routeIs('user.create')">
+                        {{ __('Tambah User Mesin') }}
+                    </x-nav-link>
                 </div>
             </div>
 

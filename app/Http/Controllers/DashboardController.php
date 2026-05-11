@@ -12,9 +12,10 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $hariIni = now()->toDateString();
+        //dd($user);
 
         $absensiHariIni = Attendance::with('member')
-                            ->where('tanggal', $hariIni)
+                            ->where('date', $hariIni)
                             ->orderBy('jam_masuk', 'desc')
                             ->get();
 
@@ -35,7 +36,7 @@ class DashboardController extends Controller
     {
         try {
             // Memanggil command penarikan data secara manual dari sistem
-            Artisan::call('absen:tarik', ['ip' => '192.168.1.201']); // Sesuaikan IP jika perlu
+            Artisan::call('absen:tarik', ['ip' => '192.168.1.10']); // Sesuaikan IP jika perlu
 
             return redirect()->back()->with('success', 'Sinkronisasi data dari mesin X100-C berhasil dilakukan!');
         } catch (\Exception $e) {
@@ -86,11 +87,15 @@ class DashboardController extends Controller
     {
         try {
             // Sesuaikan IP dengan IP mesin X100-C Bapak
-            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.200.27');
+            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.1.10');
 
             if ($zk->connect()) {
                 // Menarik semua data user dari memori mesin
                 $users = $zk->getUser();
+
+                // TAMBAHKAN BARIS INI UNTUK MENGINTIP DATA MENTAH
+                //dd($users);
+                
                 $jumlahBaru = 0;
 
                 foreach ($users as $u) {
@@ -128,7 +133,7 @@ class DashboardController extends Controller
     public function cekKoneksiMesin()
     {
         try {
-            $ip = '192.168.200.27'; // Sesuaikan IP mesin di bengkel
+            $ip = '192.168.1.10'; // Sesuaikan IP mesin di bengkel
             $zk = new \Rats\Zkteco\Lib\ZKTeco($ip);
 
             if ($zk->connect()) {
@@ -142,6 +147,110 @@ class DashboardController extends Controller
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', "Terjadi kesalahan jaringan: " . $e->getMessage());
+        }
+    }
+
+    // Menampilkan Form Tambah User
+    public function formTambahUser()
+    {
+        return view('dashboard.tambah-user');
+    }
+
+    // Memproses Data ke Database dan ke Mesin Fingerprint
+    public function simpanUser(Request $request)
+    {
+        // 1. Validasi inputan form
+        $request->validate([
+            'nama'           => 'required|string|max:24', // Mesin max 24 karakter
+            'nomor_induk'    => 'required|string',
+            'kategori'       => 'required|in:siswa,guru',
+            'departemen'     => 'required|string',
+            'fingerprint_id' => 'required|integer|unique:members,fingerprint_id',
+        ]);
+
+        // 2. Simpan data ke Database Laravel
+        $member = \App\Models\Member::create([
+            'nama'           => $request->nama,
+            'nomor_induk'    => $request->nomor_induk,
+            'kategori'       => $request->kategori,
+            'departemen'     => $request->departemen,
+            'fingerprint_id' => $request->fingerprint_id,
+        ]);
+
+        // 3. Kirim (Push) data nama dan ID ke Mesin X100-C
+        try {
+            // Gunakan IP mesin yang sudah kita pastikan benar sebelumnya
+            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.1.10'); 
+            
+            if ($zk->connect()) {
+                // Format library ZKTeco: setUser(UID, UserID, Nama, Password, Role)
+                // UID (Internal Mesin) kita samakan dengan ID Database agar sinkron
+                // Role 0 = User Biasa (Siswa/Guru), Role 14 = Admin Mesin
+                
+                $zk->setUser(
+                    $member->id,                 // UID Internal
+                    $request->fingerprint_id,    // ID PIN di layar mesin
+                    $request->nama,              // Nama yang tampil di mesin
+                    '',                          // Password (dikosongkan)
+                    0                            // Role (0 = Normal User)
+                ); 
+                
+                $zk->disconnect();
+                
+                return redirect()->back()->with('success', 'Luar Biasa! Data berhasil disimpan di Database DAN nama siswa sudah terkirim ke mesin Fingerprint.');
+            } else {
+                return redirect()->back()->with('error', 'Data tersimpan di Database, TAPI mesin tidak merespons. Pastikan mesin menyala.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Data tersimpan di Database, tapi error ke mesin: ' . $e->getMessage());
+        }
+    }
+
+    public function formAbsensiManual()
+    {
+        $siswa = \App\Models\Member::all();
+        return view('dashboard.input-absensi', compact('siswa'));
+    }
+
+    public function simpanAbsensiManual(Request $request)
+    {
+        $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'tanggal'   => 'required|date',
+            'jam_masuk' => 'required',
+            'jam_pulang'=> 'nullable',
+            'status'    => 'required'
+        ]);
+
+        // 1. Ambil data member untuk mendapatkan fingerprint_id
+        $member = \App\Models\Member::find($request->member_id);
+
+        // 2. Simpan/Update ke Database Laravel
+        $absen = \App\Models\Attendance::updateOrCreate(
+            ['member_id' => $request->member_id, 'tanggal' => $request->tanggal],
+            ['jam_masuk' => $request->jam_masuk, 'jam_pulang' => $request->jam_pulang, 'status' => $request->status]
+        );
+
+        // 3. Kirim (Push) ke Mesin Fingerprint
+        try {
+            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.1.10');
+            if ($zk->connect()) {
+                // Format: setAttendance(user_id, state, timestamp)
+                // State 0 biasanya untuk Masuk, State 1 untuk Pulang
+                
+                // Kirim data jam masuk ke mesin
+                $zk->setAttendance($member->fingerprint_id, 0, $request->tanggal . ' ' . $request->jam_masuk . ':00');
+                
+                // Jika jam pulang diisi, kirim juga ke mesin
+                if ($request->jam_pulang) {
+                    $zk->setAttendance($member->fingerprint_id, 1, $request->tanggal . ' ' . $request->jam_pulang . ':00');
+                }
+
+                $zk->disconnect();
+                return redirect()->back()->with('success', 'Data berhasil disimpan di Database dan disinkronkan ke Mesin.');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('success', 'Data tersimpan di Database, namun gagal mengirim ke mesin (Mesin Offline).');
         }
     }
 }

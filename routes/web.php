@@ -36,4 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route untuk cek koneksi mesin
     Route::post('/dashboard/cek-koneksi', [DashboardController::class, 'cekKoneksiMesin'])->name('koneksi.cek');
+
+    // Route untuk sinkronisasi push user ke mesin
+    Route::get('/dashboard/tambah-user', [DashboardController::class, 'formTambahUser'])->name('user.create');
+    Route::post('/dashboard/tambah-user', [DashboardController::class, 'simpanUser'])->name('user.store');
+
+    Route::get('/dashboard/absensi-manual', [DashboardController::class, 'formAbsensiManual'])->name('absensi.manual');
+Route::post('/dashboard/absensi-manual', [DashboardController::class, 'simpanAbsensiManual'])->name('absensi.simpan');
 });
