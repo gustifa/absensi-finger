@@ -17,7 +17,7 @@ class TarikDataMesin extends Command
     /**
      * Execute the console command.
      */
-    protected $signature = 'absen:tarik {ip=192.168.1.201}';
+    protected $signature = 'absen:tarik {ip=192.168.1.10}';
     protected $description = 'Tarik data masuk & pulang dari mesin fingerprint';
     public function handle()
     {

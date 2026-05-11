@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-Schedule::command('absen:tarik 192.168.1.201')->everyMinute();
+Schedule::command('absen:tarik 192.168.1.10')->everyMinute();

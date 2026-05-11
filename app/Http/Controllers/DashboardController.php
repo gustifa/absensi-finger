@@ -35,7 +35,7 @@ class DashboardController extends Controller
     {
         try {
             // Memanggil command penarikan data secara manual dari sistem
-            Artisan::call('absen:tarik', ['ip' => '192.168.1.201']); // Sesuaikan IP jika perlu
+            Artisan::call('absen:tarik', ['ip' => '192.168.1.10']); // Sesuaikan IP jika perlu
 
             return redirect()->back()->with('success', 'Sinkronisasi data dari mesin X100-C berhasil dilakukan!');
         } catch (\Exception $e) {
@@ -86,11 +86,14 @@ class DashboardController extends Controller
     {
         try {
             // Sesuaikan IP dengan IP mesin X100-C Bapak
-            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.200.27');
+            $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.1.10');
 
             if ($zk->connect()) {
                 // Menarik semua data user dari memori mesin
                 $users = $zk->getUser();
+
+                // TAMBAHKAN BARIS INI UNTUK MENGINTIP DATA MENTAH
+                dd($users);
                 $jumlahBaru = 0;
 
                 foreach ($users as $u) {
@@ -128,7 +131,7 @@ class DashboardController extends Controller
     public function cekKoneksiMesin()
     {
         try {
-            $ip = '192.168.200.27'; // Sesuaikan IP mesin di bengkel
+            $ip = '192.168.1.10'; // Sesuaikan IP mesin di bengkel
             $zk = new \Rats\Zkteco\Lib\ZKTeco($ip);
 
             if ($zk->connect()) {
