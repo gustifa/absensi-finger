@@ -42,5 +42,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dashboard/tambah-user', [DashboardController::class, 'simpanUser'])->name('user.store');
 
     Route::get('/dashboard/absensi-manual', [DashboardController::class, 'formAbsensiManual'])->name('absensi.manual');
-Route::post('/dashboard/absensi-manual', [DashboardController::class, 'simpanAbsensiManual'])->name('absensi.simpan');
+    Route::post('/dashboard/absensi-manual', [DashboardController::class, 'simpanAbsensiManual'])->name('absensi.simpan');
+
+// Route untuk Master Data Semua Absensi
+    Route::get('/dashboard/seluruh-absensi', [DashboardController::class, 'seluruhAbsensi'])->name('absensi.semua');
+
+    // Route untuk melihat daftar seluruh user
+    Route::get('/dashboard/daftar-user', [DashboardController::class, 'daftarUser'])->name('user.daftar');
 });

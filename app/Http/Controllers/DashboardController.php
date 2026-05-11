@@ -249,4 +249,28 @@ class DashboardController extends Controller
             return redirect()->back()->with('success', 'Data tersimpan di Database, namun gagal mengirim ke mesin (Mesin Offline).');
         }
     }
+
+    // Menampilkan seluruh data absensi (Master Data)
+    public function seluruhAbsensi()
+    {
+        // Mengambil seluruh data absensi diurutkan dari tanggal dan jam terbaru
+        // Kita gunakan paginate(50) untuk menampilkan 50 baris per halaman
+        $attendances = \App\Models\Attendance::with('member')
+                        ->orderBy('tanggal', 'desc')
+                        ->orderBy('jam_masuk', 'desc')
+                        ->paginate(50);
+
+        return view('dashboard.seluruh-absensi', compact('attendances'));
+    }
+
+    // Menampilkan daftar seluruh user (Siswa dan Guru)
+    public function daftarUser()
+    {
+        // Mengambil data dari tabel members, diurutkan berdasarkan Kategori (Guru/Siswa), lalu Nama
+        $users = \App\Models\Member::orderBy('kategori', 'asc')
+                                   ->orderBy('nama', 'asc')
+                                   ->paginate(50); // Menampilkan 50 data per halaman
+
+        return view('dashboard.daftar-user', compact('users'));
+    }
 }

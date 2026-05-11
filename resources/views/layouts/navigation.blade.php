@@ -23,6 +23,18 @@
                     <x-nav-link :href="route('user.create')" :active="request()->routeIs('user.create')">
                         {{ __('Tambah User Mesin') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('absensi.manual')" :active="request()->routeIs('absensi.manual')">
+                        {{ __('Absensi Manual') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('absensi.semua')" :active="request()->routeIs('absensi.semua')">
+                        {{ __('Seluruh Absensi') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('user.daftar')" :active="request()->routeIs('user.daftar')">
+                        {{ __('Daftar User') }}
+                    </x-nav-link>
                 </div>
             </div>
 
