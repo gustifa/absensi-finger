@@ -1,21 +1,34 @@
 <x-app-layout>
     <x-slot name="header">
-    <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Pantauan Real-time Piket - SMK N 1 Bukittinggi') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                {{ __('Pantauan Real-time Piket - SMK N 1 Bukittinggi') }}
+            </h2>
 
-        <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-500">Auto-refresh tiap 1 menit</span>
+            <div class="flex items-center space-x-2"> <span class="mr-2 text-sm text-gray-500">Auto-refresh tiap 1 menit</span>
 
-            <form action="{{ route('tarik.manual') }}" method="POST">
-                @csrf
-                <button type="submit" onclick="return confirm('Mulai tarik data manual dari mesin?')" class="px-4 py-2 font-bold text-white bg-blue-600 rounded shadow hover:bg-blue-700">
-                    Tarik Data Sekarang
-                </button>
-            </form>
+                <form action="{{ route('koneksi.cek') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-gray-700 border border-transparent rounded-md shadow-sm hover:bg-gray-800 focus:bg-gray-800 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        Cek Koneksi
+                    </button>
+                </form>
+
+                <form action="{{ route('tarik.user') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Tarik data profil user/siswa dari mesin?')" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        Sinkron User
+                    </button>
+                </form>
+
+                <form action="{{ route('tarik.manual') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Mulai tarik data absen hari ini dari mesin?')" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Tarik Absen
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
     </x-slot>
 
     <meta http-equiv="refresh" content="60">

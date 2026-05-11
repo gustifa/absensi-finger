@@ -26,4 +26,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Tambahkan baris ini
     Route::post('/dashboard/tarik-manual', [DashboardController::class, 'tarikManual'])->name('tarik.manual');
+
+    // Route untuk fitur input manual guru
+    Route::get('/dashboard/input-manual', [DashboardController::class, 'formKehadiranManual'])->name('kehadiran.manual');
+    Route::post('/dashboard/input-manual', [DashboardController::class, 'simpanKehadiranManual'])->name('kehadiran.store');
+
+    // Route untuk menarik data USER dari mesin
+    Route::post('/dashboard/tarik-user', [DashboardController::class, 'tarikUserMesin'])->name('tarik.user');
+
+    // Route untuk cek koneksi mesin
+    Route::post('/dashboard/cek-koneksi', [DashboardController::class, 'cekKoneksiMesin'])->name('koneksi.cek');
 });
